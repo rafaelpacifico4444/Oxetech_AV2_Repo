@@ -1,0 +1,15 @@
+# Ambiente virtual
+venv/
+ec2-demo-env/
+*/venv/
+
+# Cache do Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Variáveis de ambiente sensíveis
+.env
+
+# Arquivos do sistema
+.DS_Store
