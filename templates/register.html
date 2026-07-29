@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Cadastro{% endblock %}
+{% block content %}
+    <h1>Criar conta</h1>
+    <p class="subtitle">Preencha os dados para se cadastrar.</p>
+    <form method="POST" action="{{ url_for('register') }}" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="field">
+            {{ form.name.label }}
+            {{ form.name(placeholder="Seu nome") }}
+            {% for error in form.name.errors %}<div class="errors">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="field">
+            {{ form.email.label }}
+            {{ form.email(placeholder="voce@email.com") }}
+            {% for error in form.email.errors %}<div class="errors">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="field">
+            {{ form.password.label }}
+            {{ form.password(placeholder="Mínimo 8 caracteres") }}
+            {% for error in form.password.errors %}<div class="errors">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="field">
+            {{ form.confirm_password.label }}
+            {{ form.confirm_password(placeholder="Repita a senha") }}
+            {% for error in form.confirm_password.errors %}<div class="errors">{{ error }}</div>{% endfor %}
+        </div>
+        {{ form.submit() }}
+    </form>
+    <p class="footer-link">Já tem conta? <a href="{{ url_for('login') }}">Entrar</a></p>
+{% endblock %}

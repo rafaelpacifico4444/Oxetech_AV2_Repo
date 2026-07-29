@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Painel{% endblock %}
+{% block content %}
+    <h1>Parabéns, você se conectou! 🎉</h1>
+    <p class="subtitle">Olá, {{ user.name }} — você está autenticado como {{ user.email }}.</p>
+
+    <div class="actions">
+        <form method="POST" action="{{ url_for('logout') }}">
+            {{ delete_form.hidden_tag() }}
+            <button type="submit">Logout</button>
+        </form>
+
+        <form method="POST" action="{{ url_for('delete_account') }}"
+              onsubmit="return confirm('Tem certeza que deseja deletar sua conta? Essa ação não pode ser desfeita.');">
+            {{ delete_form.hidden_tag() }}
+            <button type="submit" class="danger">Deletar conta</button>
+        </form>
+    </div>
+{% endblock %}

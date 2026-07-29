@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Entrar{% endblock %}
+{% block content %}
+    <h1>Entrar</h1>
+    <p class="subtitle">Acesse sua conta para continuar.</p>
+    <form method="POST" action="{{ url_for('login') }}" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="field">
+            {{ form.email.label }}
+            {{ form.email(placeholder="voce@email.com") }}
+            {% for error in form.email.errors %}<div class="errors">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="field">
+            {{ form.password.label }}
+            {{ form.password(placeholder="••••••••") }}
+            {% for error in form.password.errors %}<div class="errors">{{ error }}</div>{% endfor %}
+        </div>
+        {{ form.submit() }}
+    </form>
+    <p class="footer-link">Não tem conta? <a href="{{ url_for('register') }}">Cadastre-se</a></p>
+{% endblock %}
