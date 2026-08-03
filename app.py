@@ -80,6 +80,10 @@ def create_app():
 
     # ── ROTAS ──
 
+    @app.route("/health")
+    def health():
+        return "ok", 200
+
     @app.route("/")
     def index():
         if current_user.is_authenticated:
