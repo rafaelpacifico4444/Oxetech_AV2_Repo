@@ -1,19 +1,427 @@
 {% extends "base.html" %}
-{% block title %}Painel{% endblock %}
+{% block title %}Painel — OlhaNuvem{% endblock %}
+
+{% block extra_styles %}
+<style>
+  /* ── Reset de estilos herdados do base.html para o dashboard ── */
+  body {
+    align-items: flex-start;
+    justify-content: flex-start;
+    background: #0d1117;
+    padding: 0;
+    min-height: 100vh;
+    font-family: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
+    color: #e6edf3;
+  }
+
+  .card {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  /* ── Layout principal ── */
+  .dashboard-wrapper {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 64px;
+  }
+
+  /* ── Cabeçalho ── */
+  .dash-header {
+    border-bottom: 1px solid #21262d;
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+  }
+
+  .dash-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .dash-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #58a6ff;
+    margin: 0;
+  }
+
+  .dash-user-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    color: #8b949e;
+  }
+
+  .dash-user-pill .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #3fb950;
+    flex-shrink: 0;
+  }
+
+  .dash-user-pill strong {
+    color: #e6edf3;
+  }
+
+  .dash-subtitle {
+    margin: 12px 0 0;
+    font-size: 0.78rem;
+    color: #8b949e;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing: 0;
+  }
+
+  /* ── Grade de cards de métricas ── */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .metric-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .metric-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #58a6ff;
+    opacity: 0.6;
+  }
+
+  .metric-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #8b949e;
+    margin-bottom: 8px;
+  }
+
+  .metric-value {
+    font-size: 0.92rem;
+    color: #e6edf3;
+    word-break: break-all;
+  }
+
+  .metric-value.green { color: #3fb950; }
+  .metric-value.blue  { color: #58a6ff; }
+
+  /* ── Seção de tabela ── */
+  .section-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #8b949e;
+    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #21262d;
+  }
+
+  .infra-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    margin-bottom: 32px;
+  }
+
+  .infra-table thead tr {
+    border-bottom: 1px solid #30363d;
+  }
+
+  .infra-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #8b949e;
+    font-weight: 600;
+  }
+
+  .infra-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #161b22;
+    color: #c9d1d9;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 0.82rem;
+  }
+
+  .infra-table tr:hover td {
+    background: #161b22;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    font-family: "SF Mono", monospace;
+    letter-spacing: 0.04em;
+  }
+
+  .badge-compute  { background: #1f3a5f; color: #58a6ff; }
+  .badge-network  { background: #1a3a2a; color: #3fb950; }
+  .badge-storage  { background: #3a2a1a; color: #f0883e; }
+  .badge-database { background: #2d1f3f; color: #bc8cff; }
+  .badge-security { background: #3a1f1f; color: #ff7b72; }
+  .badge-cdn      { background: #1f3040; color: #79c0ff; }
+  .badge-serverless { background: #2a2a1a; color: #d2a679; }
+
+  /* ── Zona de ações ── */
+  .actions-section {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .actions-info {
+    font-size: 0.78rem;
+    color: #8b949e;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  .actions-info strong {
+    color: #e6edf3;
+    display: block;
+    margin-bottom: 2px;
+    font-size: 0.85rem;
+  }
+
+  .actions-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn-action {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: "SF Mono", monospace;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    width: auto;
+  }
+
+  .btn-action:hover { opacity: 0.8; }
+
+  .btn-logout {
+    background: #21262d;
+    border-color: #30363d;
+    color: #c9d1d9;
+  }
+
+  .btn-delete {
+    background: #3a1f1f;
+    border-color: #f85149;
+    color: #ff7b72;
+  }
+
+  /* ── Footer ── */
+  .dash-footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid #21262d;
+    font-size: 0.72rem;
+    color: #484f58;
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.8;
+  }
+
+  .dash-footer code {
+    background: #161b22;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: "SF Mono", monospace;
+    font-size: 0.7rem;
+    color: #8b949e;
+  }
+
+  /* ── Flash messages reposicionadas ── */
+  .flash-container {
+    margin-bottom: 20px;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-    <h1>Parabéns, você se conectou! 🎉</h1>
-    <p class="subtitle">Olá, {{ user.name }} — você está autenticado como {{ user.email }}.</p>
+<div class="dashboard-wrapper">
 
-    <div class="actions">
-        <form method="POST" action="{{ url_for('logout') }}">
-            {{ delete_form.hidden_tag() }}
-            <button type="submit">Logout</button>
-        </form>
+  {# Flash messages #}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
 
-        <form method="POST" action="{{ url_for('delete_account') }}"
-              onsubmit="return confirm('Tem certeza que deseja deletar sua conta? Essa ação não pode ser desfeita.');">
-            {{ delete_form.hidden_tag() }}
-            <button type="submit" class="danger">Deletar conta</button>
-        </form>
+  {# Cabeçalho #}
+  <div class="dash-header">
+    <div class="dash-header-top">
+      <h1 class="dash-title">// OlhaNuvem — Painel</h1>
+      <div class="dash-user-pill">
+        <span class="dot"></span>
+        <span>autenticado como <strong>{{ user.email }}</strong></span>
+      </div>
     </div>
+    <p class="dash-subtitle">
+      Infraestrutura provisionada via Terraform · Região <code>sa-east-1</code> ·
+      Recarregue para ver o balanceamento entre instâncias
+    </p>
+  </div>
+
+  {# Cards de métricas da sessão #}
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-label">Usuário</div>
+      <div class="metric-value blue">{{ user.name }}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Status da sessão</div>
+      <div class="metric-value green">● autenticado</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Banco de dados</div>
+      <div class="metric-value">PostgreSQL 16</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Ambiente</div>
+      <div class="metric-value">dev · t3.micro</div>
+    </div>
+  </div>
+
+  {# Tabela de serviços AWS #}
+  <p class="section-title">Catálogo de serviços provisionados</p>
+  <table class="infra-table">
+    <thead>
+      <tr>
+        <th>Serviço</th>
+        <th>Categoria</th>
+        <th>Papel na arquitetura</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Auto Scaling Group + Launch Template</td>
+        <td><span class="badge badge-compute">Compute</span></td>
+        <td>Mantém 2 instâncias EC2 Ubuntu 24.04 com Nginx + Gunicorn + Flask</td>
+      </tr>
+      <tr>
+        <td>Application Load Balancer</td>
+        <td><span class="badge badge-network">Network</span></td>
+        <td>Distribui tráfego HTTPS entre as instâncias do ASG</td>
+      </tr>
+      <tr>
+        <td>CloudFront</td>
+        <td><span class="badge badge-cdn">CDN</span></td>
+        <td>CDN global com HTTPS obrigatório na borda; origin no ALB</td>
+      </tr>
+      <tr>
+        <td>Route 53 + ACM</td>
+        <td><span class="badge badge-network">Network</span></td>
+        <td>DNS gerenciado e certificados TLS validados automaticamente</td>
+      </tr>
+      <tr>
+        <td>RDS PostgreSQL</td>
+        <td><span class="badge badge-database">Database</span></td>
+        <td>Banco compartilhado em subnet privada; dados persistem entre instâncias</td>
+      </tr>
+      <tr>
+        <td>S3</td>
+        <td><span class="badge badge-storage">Storage</span></td>
+        <td>Bucket de assets com versionamento e criptografia AES-256</td>
+      </tr>
+      <tr>
+        <td>Lambda + API Gateway</td>
+        <td><span class="badge badge-serverless">Serverless</span></td>
+        <td>Recebe webhook do GitHub, valida HMAC-SHA256 e dispara deploy via SSM</td>
+      </tr>
+      <tr>
+        <td>SSM Session Manager</td>
+        <td><span class="badge badge-security">Security</span></td>
+        <td>Acesso às instâncias sem SSH; executor de comandos remotos pelo Lambda</td>
+      </tr>
+      <tr>
+        <td>IAM Roles + Policies</td>
+        <td><span class="badge badge-security">Security</span></td>
+        <td>Princípio do menor privilégio para EC2 (SSM) e Lambda (SendCommand)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  {# Ações da conta #}
+  <p class="section-title">Conta</p>
+  <div class="actions-section">
+    <div class="actions-info">
+      <strong>{{ user.name }}</strong>
+      {{ user.email }}
+    </div>
+    <div class="actions-buttons">
+      <form method="POST" action="{{ url_for('logout') }}">
+        {{ delete_form.hidden_tag() }}
+        <button type="submit" class="btn-action btn-logout">$ logout</button>
+      </form>
+      <form method="POST" action="{{ url_for('delete_account') }}"
+            onsubmit="return confirm('Tem certeza que deseja deletar sua conta? Essa ação não pode ser desfeita.');">
+        {{ delete_form.hidden_tag() }}
+        <button type="submit" class="btn-action btn-delete">rm -rf conta</button>
+      </form>
+    </div>
+  </div>
+
+  {# Footer #}
+  <div class="dash-footer">
+    Terraform · Auto Scaling Group · Application Load Balancer · RDS PostgreSQL ·
+    S3 · CloudFront · Lambda · API Gateway · SSM Session Manager<br>
+    Deploy automático via <code>github webhook → lambda → ssm send-command → git pull</code>
+  </div>
+
+</div>
 {% endblock %}
