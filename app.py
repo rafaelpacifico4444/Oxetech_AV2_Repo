@@ -9,6 +9,8 @@ from extensions import db, login_manager, bcrypt, csrf
 from models import User
 from forms import LoginForm, RegisterForm, DeleteAccountForm
 
+import urllib.request
+
 
 def create_app():
     app = Flask(__name__)
@@ -31,14 +33,45 @@ def create_app():
         return db.session.get(User, int(user_id))
 
     # Função auxiliar para ler os arquivos de infraestrutura da AWS
-    def ler_arquivo(caminho: str) -> str:
+    def obter_metadata_aws(endpoint: str) -> str:
+        """Busca informações de infraestrutura diretamente dos metadados da AWS EC2 (IMDSv2)."""
+        try:
+            # 1. Solicita o token de autenticação do IMDSv2
+            req_token = urllib.request.Request(
+                "http://169.254.169.254/latest/api/token",
+                headers={"X-aws-ec2-metadata-token-ttl-seconds": "60"},
+                method="PUT"
+            )
+            token = urllib.request.urlopen(req_token, timeout=1).read().decode()
+
+            # 2. Busca o dado solicitado usando o token
+            req_data = urllib.request.Request(
+                f"http://169.254.169.254/latest/meta-data/{endpoint}",
+                headers={"X-aws-ec2-metadata-token": token}
+            )
+            return urllib.request.urlopen(req_data, timeout=1).read().decode().strip()
+        except Exception:
+            return None
+
+
+    def ler_arquivo(caminho: str, ec2_metadata_path: str = None) -> str:
+        """Tenta ler do arquivo local. Se falhar, busca na API de metadados da AWS."""
+        # Tentativa 1: Ler do arquivo local (/var/lib/app/...)
         try:
             if os.path.exists(caminho):
                 with open(caminho, "r", encoding="utf-8") as f:
                     conteudo = f.read().strip()
-                    return conteudo if conteudo else "indisponível"
+                    if conteudo:
+                        return conteudo
         except Exception:
             pass
+
+        # Tentativa 2: Buscar direto da infraestrutura AWS
+        if ec2_metadata_path:
+            meta = obter_metadata_aws(ec2_metadata_path)
+            if meta:
+                return meta
+
         return "indisponível"
 
     # Cria as tabelas do banco automaticamente caso não existam
@@ -100,10 +133,10 @@ def create_app():
     @app.route("/dashboard")
     @login_required
     def dashboard():
-        # Lê os dados da instância EC2 / AWS
-        instance_id = ler_arquivo("/var/lib/app/instance-id")
-        az = ler_arquivo("/var/lib/app/az")
-        ip_local = ler_arquivo("/var/lib/app/ip")
+        # Lê do arquivo local ou busca nos metadados da EC2
+        instance_id = ler_arquivo("/var/lib/app/instance-id", "instance-id")
+        az = ler_arquivo("/var/lib/app/az", "placement/availability-zone")
+        ip_local = ler_arquivo("/var/lib/app/ip", "local-ipv4")
         servido_em = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
         delete_form = DeleteAccountForm()
