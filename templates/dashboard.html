@@ -89,7 +89,7 @@
   /* ── Grade de cards de métricas ── */
   .metrics-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 12px;
     margin-bottom: 32px;
   }
@@ -130,6 +130,7 @@
 
   .metric-value.green { color: #3fb950; }
   .metric-value.blue  { color: #58a6ff; }
+  .metric-value.orange{ color: #f0883e; }
 
   /* ── Seção de tabela ── */
   .section-title {
@@ -260,28 +261,6 @@
     color: #ff7b72;
   }
 
-  /* ── Footer ── */
-  .dash-footer {
-    margin-top: 48px;
-    padding-top: 20px;
-    border-top: 1px solid #21262d;
-    font-size: 0.72rem;
-    color: #484f58;
-    text-align: center;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    line-height: 1.8;
-  }
-
-  .dash-footer code {
-    background: #161b22;
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-family: "SF Mono", monospace;
-    font-size: 0.7rem;
-    color: #8b949e;
-  }
-
-  /* ── Flash messages reposicionadas ── */
   .flash-container {
     margin-bottom: 20px;
   }
@@ -305,40 +284,47 @@
   {# Cabeçalho #}
   <div class="dash-header">
     <div class="dash-header-top">
-      <h1 class="dash-title">// OlhaNuvem — Painel</h1>
+      <h1 class="dash-title">// OlhaNuvem — Painel de Alta Disponibilidade</h1>
       <div class="dash-user-pill">
         <span class="dot"></span>
         <span>autenticado como <strong>{{ user.email }}</strong></span>
       </div>
     </div>
     <p class="dash-subtitle">
-      Infraestrutura provisionada via Terraform · Região <code>sa-east-1</code> ·
-      Recarregue para ver o balanceamento entre instâncias
+      Infraestrutura redundante na AWS · Recarregue a página para alternar a instância que responde à requisição.
     </p>
   </div>
 
-  {# Cards de métricas da sessão #}
+  {# Cards de métricas da infraestrutura e sessão #}
   <div class="metrics-grid">
     <div class="metric-card">
       <div class="metric-label">Usuário</div>
       <div class="metric-value blue">{{ user.name }}</div>
     </div>
     <div class="metric-card">
-      <div class="metric-label">Status da sessão</div>
-      <div class="metric-value green">● autenticado</div>
+      <div class="metric-label">Instância que respondeu</div>
+      <div class="metric-value orange">{{ instance_id }}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Zona de disponibilidade</div>
+      <div class="metric-value green">{{ az }}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">IP privado</div>
+      <div class="metric-value">{{ ip_local }}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Servido em</div>
+      <div class="metric-value green">{{ servido_em }}</div>
     </div>
     <div class="metric-card">
       <div class="metric-label">Banco de dados</div>
-      <div class="metric-value">PostgreSQL 16</div>
-    </div>
-    <div class="metric-card">
-      <div class="metric-label">Ambiente</div>
-      <div class="metric-value">dev · t3.micro</div>
+      <div class="metric-value blue">RDS PostgreSQL</div>
     </div>
   </div>
 
   {# Tabela de serviços AWS #}
-  <p class="section-title">Catálogo de serviços provisionados</p>
+  <p class="section-title">Catálogo de serviços da arquitetura</p>
   <table class="infra-table">
     <thead>
       <tr>
@@ -351,12 +337,12 @@
       <tr>
         <td>Auto Scaling Group + Launch Template</td>
         <td><span class="badge badge-compute">Compute</span></td>
-        <td>Mantém 2 instâncias EC2 Ubuntu 24.04 com Nginx + Gunicorn + Flask</td>
+        <td>Mantém instâncias EC2 Ubuntu com Nginx + Gunicorn + Flask em múltiplas AZs</td>
       </tr>
       <tr>
         <td>Application Load Balancer</td>
         <td><span class="badge badge-network">Network</span></td>
-        <td>Distribui tráfego HTTPS entre as instâncias do ASG</td>
+        <td>Distribui tráfego HTTPS entre as instâncias disponíveis no ASG</td>
       </tr>
       <tr>
         <td>CloudFront</td>
@@ -376,7 +362,7 @@
       <tr>
         <td>S3</td>
         <td><span class="badge badge-storage">Storage</span></td>
-        <td>Bucket de assets com versionamento e criptografia AES-256</td>
+        <td>Bucket de assets estáticos com versionamento e criptografia AES-256</td>
       </tr>
       <tr>
         <td>Lambda + API Gateway</td>
