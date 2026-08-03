@@ -12,7 +12,7 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # A app roda atrás do ALB (TLS termina lá). ProxyFix garante que
+    # A app roda atrás do ALB (TLS termina lá) ProxyFix garante que
     # request.is_secure e url_for(..., _external=True) respeitem o
     # cabeçalho X-Forwarded-Proto enviado pelo load balancer.
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
