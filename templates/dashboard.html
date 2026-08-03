@@ -316,37 +316,24 @@
       Recarregue para ver o balanceamento entre instâncias
     </p>
   </div>
-  
-{# Cards de métricas da sessão e Infraestrutura #}
+
+  {# Cards de métricas da sessão #}
   <div class="metrics-grid">
     <div class="metric-card">
       <div class="metric-label">Usuário</div>
       <div class="metric-value blue">{{ user.name }}</div>
     </div>
-    
-    <div class="metric-card">
-      <div class="metric-label">Instância que respondeu</div>
-      <div class="metric-value">{{ instance_id|default('indisponível') }}</div>
-    </div>
-    
-    <div class="metric-card">
-      <div class="metric-label">Zona de disponibilidade</div>
-      <div class="metric-value">{{ az|default('indisponível') }}</div>
-    </div>
-    
-    <div class="metric-card">
-      <div class="metric-label">IP privado</div>
-      <div class="metric-value">{{ ip_local|default('indisponível') }}</div>
-    </div>
-    
-    <div class="metric-card">
-      <div class="metric-label">Servido em</div>
-      <div class="metric-value green">{{ servido_em }}</div>
-    </div>
-
     <div class="metric-card">
       <div class="metric-label">Status da sessão</div>
       <div class="metric-value green">● autenticado</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Banco de dados</div>
+      <div class="metric-value">PostgreSQL 16</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Ambiente</div>
+      <div class="metric-value">dev · t3.micro</div>
     </div>
   </div>
 
