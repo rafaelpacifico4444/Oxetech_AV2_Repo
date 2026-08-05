@@ -201,6 +201,7 @@
   .badge-security { background: #3a1f1f; color: #ff7b72; }
   .badge-cdn      { background: #1f3040; color: #79c0ff; }
   .badge-serverless { background: #2a2a1a; color: #d2a679; }
+  .badge-cicd       { background: #232b35; color: #a371f7; }
 
   /* ── Zona de ações ── */
   .actions-section {
@@ -335,6 +336,11 @@
     </thead>
     <tbody>
       <tr>
+        <td>GitHub Actions</td>
+        <td><span class="badge badge-cicd">CI/CD</span></td>
+        <td>Pipeline automatizado para validação de código e deploy da infraestrutura (Terraform Apply)</td>
+      </tr>
+      <tr>
         <td>Auto Scaling Group + Launch Template</td>
         <td><span class="badge badge-compute">Compute</span></td>
         <td>Mantém instâncias EC2 Ubuntu com Nginx + Gunicorn + Flask em múltiplas AZs</td>
@@ -362,12 +368,12 @@
       <tr>
         <td>S3</td>
         <td><span class="badge badge-storage">Storage</span></td>
-        <td>Bucket de assets estáticos com versionamento e criptografia AES-256</td>
+        <td>Bucket de estado remoto do Terraform com versionamento e criptografia AES-256</td>
       </tr>
       <tr>
         <td>Lambda + API Gateway</td>
         <td><span class="badge badge-serverless">Serverless</span></td>
-        <td>Recebe webhook do GitHub, valida HMAC-SHA256 e dispara deploy via SSM</td>
+        <td>Recebe webhook do GitHub da aplicação, valida HMAC-SHA256 e dispara deploy via SSM</td>
       </tr>
       <tr>
         <td>SSM Session Manager</td>
@@ -377,7 +383,7 @@
       <tr>
         <td>IAM Roles + Policies</td>
         <td><span class="badge badge-security">Security</span></td>
-        <td>Princípio do menor privilégio para EC2 (SSM) e Lambda (SendCommand)</td>
+        <td>Princípio do menor privilégio para EC2 (SSM), Lambda (SendCommand) e Automações (Actions)</td>
       </tr>
     </tbody>
   </table>
@@ -404,9 +410,10 @@
 
   {# Footer #}
   <div class="dash-footer">
-    <code>Terraform · Auto Scaling Group · Application Load Balancer · RDS PostgreSQL ·
-    S3 · CloudFront · Lambda · API Gateway · SSM Session Manager</code><br>
-    <code>Deploy automático via github webhook → lambda → ssm send-command → git pull</code>
+    <code>Terraform · GitHub Actions · Auto Scaling Group · Application Load Balancer · RDS PostgreSQL ·
+    S3 · CloudFront · Lambda · API Gateway · SSM Session Manager</code><br><br>
+    <code>Deploy Infra (Terraform): GitHub Actions (Plan & Apply)</code><br>
+    <code>Deploy App (Flask): Webhook → Lambda → SSM (git pull)</code>
   </div>
 
 </div>
